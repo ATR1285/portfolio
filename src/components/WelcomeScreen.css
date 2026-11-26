@@ -1,0 +1,165 @@
+.welcome-screen {
+  position: fixed;
+  inset: 0;
+  z-index: 999999;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  background: #010407;
+  color: #e9f8ff;
+  font-family: "Inter", "Helvetica Neue", Arial, sans-serif;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  isolation: isolate;
+  transition: opacity 0.4s ease, visibility 0.4s ease;
+}
+
+.welcome-screen--fade-out {
+  opacity: 0;
+  visibility: hidden;
+}
+
+.welcome-screen__canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.welcome-screen__content {
+  position: relative;
+  z-index: 5;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 0 20px;
+}
+
+.welcome-title {
+  margin: 0;
+  font-size: clamp(38px, 6.5vw, 84px);
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  text-transform: uppercase;
+  color: #ffffff;
+  opacity: 0;
+  transform: translateY(16px);
+  transition: opacity 0.5s cubic-bezier(0.16, 1, 0.3, 1), transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.welcome-title--visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.welcome-name {
+  margin: 12px 0 0;
+  font-size: clamp(26px, 4vw, 56px);
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  background: linear-gradient(90deg, #d8f8ff, #72d9ff, #ffffff, #72d9ff);
+  background-size: 200% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  opacity: 0;
+  transform: translateY(16px);
+  transition: opacity 0.5s cubic-bezier(0.16, 1, 0.3, 1), transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.welcome-name--visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.welcome-subtitle {
+  margin: 22px 0 0;
+  font-family: "Courier New", "DM Mono", monospace;
+  font-size: clamp(10px, 1.4vw, 13px);
+  letter-spacing: 0.38em;
+  text-transform: uppercase;
+  color: rgba(157, 224, 255, 0.85);
+  opacity: 0;
+  transform: translateY(16px);
+  transition: opacity 0.5s cubic-bezier(0.16, 1, 0.3, 1), transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.welcome-subtitle--visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.welcome-tagline {
+  margin-top: 24px;
+  font-family: "Courier New", "DM Mono", monospace;
+  font-size: 10px;
+  letter-spacing: 0.32em;
+  color: rgba(173, 231, 255, 0.55);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  opacity: 0;
+  transform: translateY(16px);
+  transition: opacity 0.5s cubic-bezier(0.16, 1, 0.3, 1), transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.welcome-tagline i {
+  font-style: normal;
+  color: #6ddcff;
+}
+
+.welcome-tagline--visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.welcome-enter-btn {
+  position: absolute;
+  right: 36px;
+  bottom: 36px;
+  z-index: 10;
+  border: 1px solid rgba(109, 220, 255, 0.35);
+  background: rgba(2, 15, 24, 0.65);
+  backdrop-filter: blur(8px);
+  color: #72d9ff;
+  font-family: "Courier New", "DM Mono", monospace;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.22em;
+  padding: 11px 24px;
+  cursor: pointer;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.25s ease;
+}
+
+.welcome-enter-btn span {
+  transition: transform 0.25s ease;
+}
+
+.welcome-enter-btn:hover {
+  background: rgba(109, 220, 255, 0.15);
+  border-color: #6ddcff;
+  color: #ffffff;
+  box-shadow: 0 0 20px rgba(109, 220, 255, 0.3);
+}
+
+.welcome-enter-btn:hover span {
+  transform: translateX(4px);
+}
+
+@media (max-width: 700px) {
+  .welcome-enter-btn {
+    right: 20px;
+    bottom: 24px;
+    padding: 9px 18px;
+    font-size: 10px;
+  }
+}

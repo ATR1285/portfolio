@@ -20,6 +20,7 @@ export default function Header({ activeSection, onTalkClick }: HeaderProps) {
         <a href="#experience" className={activeSection === 'experience' ? 'active' : ''}>EXPERIENCE</a>
         <a href="#work" className={activeSection === 'work' ? 'active' : ''}>PROJECTS</a>
         <a href="#education" className={activeSection === 'education' ? 'active' : ''}>EDUCATION</a>
+        <a href="#certifications" className={activeSection === 'certifications' ? 'active' : ''}>CERTIFICATES</a>
         <a href="#contact" className={activeSection === 'contact' ? 'active' : ''}>CONTACT</a>
       </nav>
 

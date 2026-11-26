@@ -32,7 +32,7 @@ export default function About() {
 
           <div className="about-layout">
             <div className="about-profile-card">
-              <div className="about-avatar-lg">RA</div>
+              <img className="about-avatar-lg about-photo" src={`${import.meta.env.BASE_URL}richard.webp`} width={110} height={110} alt="Richard A T" />
               <p className="about-name">Richard A T</p>
               <p className="about-role">Computer Technology · Data & AI</p>
               <div className="about-tags">

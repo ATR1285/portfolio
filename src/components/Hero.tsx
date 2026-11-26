@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from 'react';
-import { ArrowUpRight, Volume2, Square } from 'lucide-react';
+import { ArrowUpRight, Download, Volume2, Square } from 'lucide-react';
 import { voiceService } from '../services/voiceService';
 
 interface HeroProps {
@@ -156,6 +156,9 @@ export default function Hero({ isSpeaking = false, setIsSpeaking }: HeroProps) {
           <div className="hero-actions">
             <a className="button primary" href="#work">
               EXPLORE WORK <ArrowUpRight size={18} />
+            </a>
+            <a className="button ghost" href={`${import.meta.env.BASE_URL}Richard_AT_Resume.pdf`} target="_blank" rel="noreferrer">
+              RESUME <Download size={16} />
             </a>
             <button 
               type="button" 

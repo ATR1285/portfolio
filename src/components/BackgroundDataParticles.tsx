@@ -50,7 +50,7 @@ export default function BackgroundDataParticles() {
       zIndex: 0,
       opacity: 0.8
     }}>
-      <Canvas camera={{ position: [0, 0, 8], fov: 60 }} dpr={[1, 2]}>
+      <Canvas style={{ pointerEvents: 'none' }} camera={{ position: [0, 0, 8], fov: 60 }} dpr={[1, 2]}>
         <ParticleField count={2500} />
       </Canvas>
     </div>

@@ -1,5 +1,5 @@
 import React from 'react';
-import { ArrowUpRight, Github, Linkedin, Mail, MapPin, Sparkles } from 'lucide-react';
+import { ArrowUpRight, Download, Github, Linkedin, Mail, MapPin, Sparkles } from 'lucide-react';
 
 export default function Contact() {
   return (
@@ -20,6 +20,17 @@ export default function Contact() {
         >
           <Mail size={22} />
           <span>Email</span>
+        </a>
+        <a 
+          href={`${import.meta.env.BASE_URL}Richard_AT_Resume.pdf`} 
+          target="_blank" 
+          rel="noreferrer" 
+          aria-label="Resume"
+          className="social-btn flex-center"
+          id="resume"
+        >
+          <Download size={22} />
+          <span>Resume</span>
         </a>
         <a 
           href="https://linkedin.com/in/richard-a-t" 

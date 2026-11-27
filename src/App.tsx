@@ -1,70 +1,74 @@
-import React, { useState, useEffect, useRef } from 'react';
-import WelcomeScreen from './components/WelcomeScreen';
+import React, { useState, useEffect } from 'react';
 import Header from './components/Header';
 import Hero from './components/Hero';
 import About from './components/About';
-import Projects from './components/Projects';
 import Skills from './components/Skills';
+import Methodology from './components/Methodology';
+import Projects from './components/Projects';
+import Experience from './components/Experience';
+import Education from './components/Education';
 import Certifications from './components/Certifications';
 import Contact from './components/Contact';
 import Footer from './components/Footer';
-import BackgroundDataParticles from './components/BackgroundDataParticles';
-import ExplainGuide from './components/ExplainGuide';
+import IntroTransition from './components/motion/IntroTransition';
+
+const SECTIONS = [
+  'hero',
+  'about',
+  'skills',
+  'methodology',
+  'projects',
+  'experience',
+  'education',
+  'certifications',
+  'contact'
+];
 
 export default function App() {
-  const [introFinished, setIntroFinished] = useState(false);
   const [activeSection, setActiveSection] = useState('hero');
-  const [isSpeaking, setIsSpeaking] = useState(false);
-
-  const observer = useRef<IntersectionObserver | null>(null);
 
   useEffect(() => {
-    observer.current = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            const sectionId = entry.target.id || entry.target.getAttribute('data-section') || 'hero';
-            setActiveSection(sectionId);
+    const handleScroll = () => {
+      const scrollPos = window.scrollY + 200;
+      for (const id of SECTIONS) {
+        const el = document.getElementById(id);
+        if (el) {
+          const top = el.offsetTop;
+          const height = el.offsetHeight;
+          if (scrollPos >= top && scrollPos < top + height) {
+            setActiveSection(id);
+            break;
           }
-        });
-      },
-      { threshold: 0.25 }
-    );
+        }
+      }
+    };
 
-    const sections = document.querySelectorAll('section, main#top, [data-section]');
-    sections.forEach((section) => observer.current?.observe(section));
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    handleScroll();
 
     return () => {
-      observer.current?.disconnect();
+      window.removeEventListener('scroll', handleScroll);
     };
-  }, [introFinished]);
+  }, []);
 
   return (
-    <div className="portfolio-app">
-      <BackgroundDataParticles />
-
-      {!introFinished && (
-        <WelcomeScreen onComplete={() => setIntroFinished(true)} />
-      )}
-
+    <div className="monograph-portfolio">
+      <IntroTransition />
       <Header activeSection={activeSection} />
 
-      <main id="top" data-section="hero">
-        <Hero isSpeaking={isSpeaking} setIsSpeaking={setIsSpeaking} />
+      <main id="top" role="main">
+        <Hero />
         <About />
-        <Projects />
         <Skills />
+        <Methodology />
+        <Projects />
+        <Experience />
+        <Education />
         <Certifications />
         <Contact />
       </main>
 
       <Footer />
-
-      <ExplainGuide 
-        activeSection={activeSection} 
-        isSpeaking={isSpeaking} 
-        setIsSpeaking={setIsSpeaking} 
-      />
     </div>
   );
 }

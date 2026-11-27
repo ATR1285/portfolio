@@ -1,192 +1,268 @@
-import React, { useEffect, useRef } from 'react';
-import { ArrowUpRight, Download, Volume2, Square } from 'lucide-react';
-import { voiceService } from '../services/voiceService';
+import React from 'react';
+import { motion } from 'framer-motion';
+import { ArrowDownRight, ArrowUpRight, Download } from 'lucide-react';
+import Magnetic from './motion/Magnetic';
+import TiltCard from './motion/TiltCard';
+import { useReducedMotion } from '../motion/useReducedMotion';
 
-interface HeroProps {
-  isSpeaking?: boolean;
-  setIsSpeaking?: (speaking: boolean) => void;
-}
+export default function Hero() {
+  const prefersReduced = useReducedMotion();
 
-export default function Hero({ isSpeaking = false, setIsSpeaking }: HeroProps) {
-  const canvasRef = useRef<HTMLCanvasElement | null>(null);
-
-  const handleExplainClick = () => {
-    if (isSpeaking) {
-      voiceService.stopSpeech();
-      setIsSpeaking?.(false);
-    } else {
-      voiceService.speakSection('hero', {
-        onStart: () => setIsSpeaking?.(true),
-        onEnd: () => setIsSpeaking?.(false),
-        onError: () => setIsSpeaking?.(false),
-      });
-    }
+  // Refined editorial entrance transition (0.8s – 1.05s total sequence)
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: prefersReduced ? 0 : 0.12,
+        delayChildren: prefersReduced ? 0 : 0.08,
+      },
+    },
   };
 
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
-
-    let animId: number;
-    let width = 360;
-    let height = 360;
-
-    const resize = () => {
-      const rect = canvas.getBoundingClientRect();
-      width = rect.width || 360;
-      height = rect.height || 360;
-      const dpr = Math.min(window.devicePixelRatio || 1, 2);
-      canvas.width = width * dpr;
-      canvas.height = height * dpr;
-      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    };
-
-    resize();
-    window.addEventListener('resize', resize);
-
-    const nodes: Array<{ x: number; y: number; vx: number; vy: number; radius: number }> = [];
-    for (let i = 0; i < 28; i++) {
-      nodes.push({
-        x: Math.random() * width,
-        y: Math.random() * height,
-        vx: (Math.random() - 0.5) * 0.4,
-        vy: (Math.random() - 0.5) * 0.4,
-        radius: Math.random() * 2 + 1,
-      });
-    }
-
-    const render = (time: number) => {
-      ctx.clearRect(0, 0, width, height);
-
-      const cx = width / 2;
-      const cy = height / 2;
-      const maxRadius = Math.min(width, height) * 0.38;
-      const intensity = isSpeaking ? 1.8 : 1.0;
-
-      // Concentric rings
-      const rings = 4;
-      for (let i = 0; i < rings; i++) {
-        const r = maxRadius * ((i + 1) / rings);
-        ctx.beginPath();
-        ctx.arc(cx, cy, r, 0, Math.PI * 2);
-        ctx.strokeStyle = `rgba(109, 220, 255, ${0.12 * intensity})`;
-        ctx.lineWidth = i === 1 ? 1.5 : 0.8;
-        ctx.stroke();
-      }
-
-      // Rotating processing ellipses
-      for (let i = 0; i < 3; i++) {
-        ctx.save();
-        ctx.translate(cx, cy);
-        ctx.rotate(time * 0.0004 * (i % 2 === 0 ? 1 : -1) * intensity);
-        ctx.beginPath();
-        ctx.ellipse(0, 0, maxRadius * 0.9, maxRadius * 0.35, 0, 0, Math.PI * 2);
-        ctx.strokeStyle = `rgba(114, 217, 255, ${0.18 * intensity})`;
-        ctx.lineWidth = 1;
-        ctx.stroke();
-        ctx.restore();
-      }
-
-      // Center core glow
-      const glowR = maxRadius * (0.3 + Math.sin(time * 0.003 * intensity) * 0.08);
-      const glow = ctx.createRadialGradient(cx, cy, 0, cx, cy, glowR);
-      glow.addColorStop(0, `rgba(118, 224, 255, ${0.5 * intensity})`);
-      glow.addColorStop(0.5, `rgba(57, 178, 255, ${0.15 * intensity})`);
-      glow.addColorStop(1, 'rgba(0,0,0,0)');
-      ctx.fillStyle = glow;
-      ctx.beginPath();
-      ctx.arc(cx, cy, glowR, 0, Math.PI * 2);
-      ctx.fill();
-
-      // Neural nodes & connections
-      nodes.forEach((node) => {
-        node.x += node.vx * intensity;
-        node.y += node.vy * intensity;
-        if (node.x < 10 || node.x > width - 10) node.vx *= -1;
-        if (node.y < 10 || node.y > height - 10) node.vy *= -1;
-      });
-
-      for (let i = 0; i < nodes.length; i++) {
-        for (let j = i + 1; j < nodes.length; j++) {
-          const dx = nodes[i].x - nodes[j].x;
-          const dy = nodes[i].y - nodes[j].y;
-          const dist = Math.sqrt(dx * dx + dy * dy);
-          if (dist < 90) {
-            const alpha = (1 - dist / 90) * 0.3 * intensity;
-            ctx.beginPath();
-            ctx.strokeStyle = `rgba(79, 211, 255, ${alpha})`;
-            ctx.lineWidth = 0.8;
-            ctx.moveTo(nodes[i].x, nodes[i].y);
-            ctx.lineTo(nodes[j].x, nodes[j].y);
-            ctx.stroke();
-          }
-        }
-      }
-
-      nodes.forEach((node) => {
-        ctx.beginPath();
-        ctx.fillStyle = `rgba(165, 237, 255, ${0.7 * intensity})`;
-        ctx.arc(node.x, node.y, node.radius, 0, Math.PI * 2);
-        ctx.fill();
-      });
-
-      animId = requestAnimationFrame(render);
-    };
-
-    animId = requestAnimationFrame(render);
-
-    return () => {
-      window.removeEventListener('resize', resize);
-      cancelAnimationFrame(animId);
-    };
-  }, [isSpeaking]);
+  const itemVariants = {
+    hidden: prefersReduced ? { opacity: 1, y: 0 } : { opacity: 0, y: 16 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: {
+        duration: prefersReduced ? 0 : 0.65,
+        ease: [0.16, 1, 0.3, 1] as const, // Editorial smooth cubic-bezier curve
+      },
+    },
+  };
 
   return (
-    <>
-      <section className="hero section" id="hero" data-section="hero">
-        <div className="hero-copy">
-          <p className="hero-eyebrow">AI • FRONTEND • DATA • TECHNOLOGY</p>
-          <h1 className="hero-title">RICHARD A T</h1>
-          <p className="hero-subtitle">COMPUTER TECHNOLOGY | DEVELOPER • DATA • AI</p>
-          <p className="lead">
-            I build reproducible data pipelines, predictive ML models, credit-risk decision platforms, and AI automation agents that turn complex enterprise datasets into clear, actionable outcomes.
-          </p>
-          <div className="hero-actions">
-            <a className="button primary" href="#work">
-              EXPLORE WORK <ArrowUpRight size={18} />
-            </a>
-            <a className="button ghost" href={`${import.meta.env.BASE_URL}Richard_AT_Resume.pdf`} target="_blank" rel="noreferrer">
-              RESUME <Download size={16} />
-            </a>
-            <button 
-              type="button" 
-              className={`button ghost ${isSpeaking ? 'button--speaking' : ''}`}
-              onClick={handleExplainClick}
+    <section
+      id="hero"
+      className="surface-dark data-grid-bg section-editorial"
+      style={{
+        position: 'relative',
+        paddingTop: 'clamp(60px, 9vw, 105px)',
+        paddingBottom: 'clamp(60px, 9vw, 105px)',
+        overflow: 'hidden',
+      }}
+    >
+      <div className="container-editorial" style={{ position: 'relative', zIndex: 2 }}>
+        <motion.div
+          variants={containerVariants}
+          initial="hidden"
+          animate="visible"
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
+            gap: '48px',
+            alignItems: 'center',
+          }}
+        >
+          {/* Main Editorial Typography & Action Column */}
+          <div style={{ maxWidth: '680px' }}>
+            {/* 1. Technical Metadata Header */}
+            <motion.div
+              variants={itemVariants}
+              style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '20px' }}
             >
-              {isSpeaking ? <Square size={16} /> : <Volume2 size={16} />} EXPLAIN
-            </button>
-          </div>
-        </div>
+              <span className="mono-tag" style={{ fontSize: '11px', color: 'var(--accent)', fontWeight: 600 }}>
+                COMPUTER TECHNOLOGY · DATA &amp; AI
+              </span>
+              <span style={{ width: '28px', height: '1px', backgroundColor: 'var(--accent-subtle)' }} />
+              <span className="mono-tag" style={{ fontSize: '11px', color: 'var(--accent-subtle)' }}>
+                2026 EDITION
+              </span>
+            </motion.div>
 
-        <div className="hero-core-visual" aria-label="Intelligence Core Visualizer">
-          <canvas ref={canvasRef} className="hero-core-canvas" />
-          <div className="hero-core-status">
-            <span>{isSpeaking ? 'PROCESSING SPEECH...' : 'THE SYSTEM IS STILL PROCESSING'}</span>
-          </div>
-        </div>
-      </section>
+            {/* 2. Editorial Headline */}
+            <motion.h1
+              variants={itemVariants}
+              className="serif-display"
+              style={{
+                fontSize: 'clamp(38px, 5.8vw, 76px)',
+                fontWeight: 400,
+                lineHeight: 1.08,
+                letterSpacing: '-0.02em',
+                color: 'var(--text-light)',
+                marginBottom: '24px',
+              }}
+            >
+              Turning fragmented datasets into{' '}
+              <em
+                style={{
+                  fontStyle: 'italic',
+                  fontWeight: 300,
+                  color: 'var(--bg-surface)',
+                  display: 'inline-block',
+                }}
+              >
+                decisive intelligence.
+              </em>
+            </motion.h1>
 
-      <section className="ticker" data-section="hero">
-        <span>GEN AI</span><i>/</i>
-        <span>AGENTIC AI</span><i>/</i>
-        <span>CREDIT RISK MODELS</span><i>/</i>
-        <span>DYNAMIC PRICING</span><i>/</i>
-        <span>PYTHON & SQL</span><i>/</i>
-        <span>MACHINE LEARNING</span><i>/</i>
-        <span>BUSINESS INTELLIGENCE</span>
-      </section>
-    </>
+            {/* 3. Subtitle Description */}
+            <motion.p
+              variants={itemVariants}
+              style={{
+                fontSize: 'clamp(15px, 1.4vw, 18px)',
+                color: 'var(--border-light)',
+                lineHeight: 1.65,
+                fontWeight: 400,
+                marginBottom: '32px',
+                maxWidth: '580px',
+              }}
+            >
+              I design reproducible SQL pipelines, predictive risk algorithms, and GenAI-powered automation agents that bridge mathematical modeling with executive enterprise outcomes.
+            </motion.p>
+
+            {/* 4. Dual CTAs & Resume Button */}
+            <motion.div
+              variants={itemVariants}
+              style={{ display: 'flex', flexWrap: 'wrap', gap: '14px', alignItems: 'center' }}
+            >
+              <Magnetic strength={0.18}>
+                <a href="#projects" className="btn-editorial-primary" aria-label="Explore Selected Projects">
+                  EXPLORE SELECTED WORK <ArrowDownRight size={15} />
+                </a>
+              </Magnetic>
+
+              <Magnetic strength={0.18}>
+                <a href="#contact" className="btn-editorial-ghost-dark" aria-label="Navigate to Contact Section">
+                  CONTACT ME <ArrowUpRight size={15} />
+                </a>
+              </Magnetic>
+
+              <Magnetic strength={0.18}>
+                <a
+                  href={`${import.meta.env.BASE_URL}Richard_AT_Resume.pdf`}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="btn-editorial-ghost-dark"
+                  style={{ borderColor: 'var(--accent-subtle)' }}
+                  aria-label="Download Verified Resume PDF"
+                >
+                  RESUME <Download size={14} />
+                </a>
+              </Magnetic>
+            </motion.div>
+          </div>
+
+          {/* Minimalist Data Telemetry Card (Static once loaded) */}
+          <motion.div
+            variants={itemVariants}
+            style={{ maxWidth: '380px', justifySelf: 'end', width: '100%' }}
+          >
+            <TiltCard
+              maxTilt={4}
+              style={{
+                backgroundColor: 'var(--card-dark)',
+                border: '1px solid var(--border-dark)',
+                padding: '28px',
+                borderRadius: '2px',
+                boxShadow: '0 20px 48px rgba(0,0,0,0.4)',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '20px',
+              }}
+            >
+              <div
+                style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  borderBottom: '1px solid var(--border-dark)',
+                  paddingBottom: '12px',
+                }}
+              >
+                <span className="mono-tag" style={{ fontSize: '10px', color: 'var(--accent-subtle)' }}>
+                  TELEMETRY BENCHMARK (ILLUSTRATIVE)
+                </span>
+                <span
+                  style={{
+                    width: '8px',
+                    height: '8px',
+                    borderRadius: '50%',
+                    backgroundColor: 'var(--accent)',
+                    boxShadow: '0 0 6px var(--accent)',
+                  }}
+                  aria-label="Static Telemetry Signal"
+                />
+              </div>
+
+              <div>
+                <span
+                  className="mono-tag"
+                  style={{ fontSize: '10px', color: 'var(--accent-subtle)', display: 'block', marginBottom: '4px' }}
+                >
+                  PRIMARY SPECIALISATION
+                </span>
+                <strong
+                  className="serif-display"
+                  style={{ fontSize: '20px', fontWeight: 500, color: 'var(--text-light)', display: 'block' }}
+                >
+                  Data Analytics · Machine Learning
+                </strong>
+              </div>
+
+              <div
+                style={{
+                  borderTop: '1px solid var(--border-dark)',
+                  paddingTop: '16px',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '8px',
+                }}
+              >
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '11px' }} className="mono-tag">
+                  <span style={{ color: 'var(--accent-subtle)' }}>Benchmark Solvency Goal</span>
+                  <span style={{ color: 'var(--text-light)', fontWeight: 600 }}>94.7%</span>
+                </div>
+                <div style={{ height: '5px', backgroundColor: 'var(--bg-dark)', borderRadius: '2px', overflow: 'hidden' }}>
+                  <div
+                    style={{
+                      height: '100%',
+                      width: '94.7%',
+                      backgroundColor: 'var(--accent)',
+                      borderRadius: '2px',
+                    }}
+                  />
+                </div>
+              </div>
+
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '11px' }} className="mono-tag">
+                  <span style={{ color: 'var(--accent-subtle)' }}>Target Lineage Integrity</span>
+                  <span style={{ color: 'var(--text-light)', fontWeight: 600 }}>100%</span>
+                </div>
+                <div style={{ height: '5px', backgroundColor: 'var(--bg-dark)', borderRadius: '2px', overflow: 'hidden' }}>
+                  <div
+                    style={{
+                      height: '100%',
+                      width: '100%',
+                      backgroundColor: 'var(--accent-subtle)',
+                      borderRadius: '2px',
+                    }}
+                  />
+                </div>
+              </div>
+
+              <p
+                className="serif-display"
+                style={{
+                  fontStyle: 'italic',
+                  fontSize: '12px',
+                  color: 'var(--accent-subtle)',
+                  borderTop: '1px solid var(--border-dark)',
+                  paddingTop: '14px',
+                  lineHeight: 1.5,
+                }}
+              >
+                &ldquo;Analysis that makes the next best operational decision verifiable and obvious.&rdquo;
+              </p>
+              <span className="mono-tag" style={{ fontSize: '9px', color: 'var(--accent-subtle)', opacity: 0.75, display: 'block', marginTop: '-8px' }}>
+                * Illustrative engineering target specifications
+              </span>
+            </TiltCard>
+          </motion.div>
+        </motion.div>
+      </div>
+    </section>
   );
 }
